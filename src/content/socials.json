@@ -6,6 +6,24 @@
 			"name": "github"
 		},
 		"text": "GitHub",
-		"link": "https://github.com/louisescher/spectre"
+		"link": "https://github.com/didacd"
+	},
+	{
+		"id": 2,
+		"icon": {
+			"type": "simple-icons",
+			"name": "mastodon"
+		},
+		"text": "Mastodon",
+		"link": "https://mastodon.social/@didacdomenech"
+	},
+	{
+		"id": 3,
+		"icon": {
+			"type": "lucide",
+			"name": "at-sign"
+		},
+		"text": "Mailbox",
+		"link": "mailto:business@didacdomenech.com"
 	}
 ]

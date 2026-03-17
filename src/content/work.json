@@ -1,9 +1,23 @@
 [
 	{
 		"id": 1,
-		"duration": "2024 - present",
-		"company": "Astro Community",
-		"title": "Astro Theme",
-		"description": "Existing as an Astro theme for anyone to use."
+		"duration": "Q4 2021 - Q2 2022",
+		"company": "AVer Europa ES",
+		"title": "Sysadmin",
+		"description": "System administrator."
+	},
+	{
+		"id": 2,
+		"duration": "Q2 2022 - Q3 2024",
+		"company": "Google",
+		"title": "Google Cloud Security Engineer",
+		"description": "Worked as an SME for L3 support in Google's own public cloud."
+	},
+	{
+		"id": 3,
+		"duration": "Q4 2024 - present",
+		"company": "Telefonica UK",
+		"title": "Subject Matter Expert - Kubernetes",
+		"description": "Working as an Infrastructure SME for Openshift & building the future of Telefonica's Telco Cloud Infrastructure."
 	}
 ]

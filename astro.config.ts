@@ -21,7 +21,7 @@ const {
 
 // https://astro.build/config
 const config = defineConfig({
-	site: 'https://spectre.lou.gg',
+	site: 'https://didac.domenech.dev',
 	output: 'static',
 	integrations: [
 		expressiveCode({
@@ -30,15 +30,15 @@ const config = defineConfig({
 		mdx(),
 		sitemap(),
 		spectre({
-			name: 'Spectre',
+			name: '🍱 Didac\'s Box',
 			openGraph: {
 				home: {
-					title: 'Spectre',
-					description: 'A minimalistic theme for Astro.',
+					title: 'Home',
+					description: 'My personal space.',
 				},
 				blog: {
 					title: 'Blog',
-					description: 'News and guides for Spectre.',
+					description: 'Sharing my inspiration.',
 				},
 				projects: {
 					title: 'Projects',

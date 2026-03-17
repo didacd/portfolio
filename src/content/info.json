@@ -3,17 +3,17 @@
 		"id": 1,
 		"icon": {
 			"type": "lucide",
-			"name": "cake"
+			"name": "brain"
 		},
-		"text": "1 year old"
+		"text": "Cloud Security Engineer"
 	},
 	{
 		"id": 2,
 		"icon": {
 			"type": "lucide",
-			"name": "earth"
+			"name": "map-pin"
 		},
 		"type": "lucide",
-		"text": "Made in Germany"
+		"text": "Barcelona - Spain"
 	}
 ]
