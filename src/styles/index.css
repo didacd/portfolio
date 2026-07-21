@@ -39,8 +39,8 @@
 	flex-direction: column;
 	gap: 1rem;
 	padding: 1rem;
-	border: 1px solid #353535;
-	color: #ffffff;
+	border: 1px solid var(--border, #353535);
+	color: var(--fg, #ffffff);
 	text-decoration: none;
 	transition:
 		background-color 0.15s ease,
@@ -49,7 +49,7 @@
 
 .post-container:hover,
 .post-container:focus-visible {
-	background-color: rgba(140, 92, 245, 0.125);
+	background-color: rgba(var(--primary-rgb), 0.125);
 	border: 1px solid var(--primary);
 }
 
@@ -59,7 +59,7 @@
 
 .post-date,
 .work-experience-duration {
-	color: #c7c7c7;
+	color: var(--fg-muted, #c7c7c7);
 }
 
 .work-experience-container {
@@ -69,7 +69,7 @@
 }
 
 .work-experience-entry:not(:last-of-type) {
-	border-bottom: 1px solid #353535;
+	border-bottom: 1px solid var(--border, #353535);
 	padding-bottom: 1rem;
 }
 
@@ -87,9 +87,35 @@
 }
 
 .socials-link {
-	color: white;
+	color: var(--fg, #ffffff);
 	display: flex;
 	flex-direction: row;
 	gap: 0.75rem;
 	align-items: center;
+}
+
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+	margin: 1.25rem 0;
+}
+
+.stat {
+	display: flex;
+	flex-direction: column;
+}
+
+.stat h3 {
+	font-size: 2em;
+	margin: 0;
+	margin-bottom: 0.5rem;
+}
+
+.stat span {
+	color: var(--fg-muted, #c7c7c7);
+}
+
+.github-languages {
+	margin-top: 1.25rem;
 }

@@ -1,15 +1,7 @@
 @font-face {
-	font-family: "Geist";
-	src: url("/fonts/Geist.woff2") format("woff2");
-	font-weight: 100 900;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Geist Mono";
-	src: url("/fonts/GeistMono.woff2") format("woff2");
-	font-weight: 100 900;
+	font-family: "Cascadia Code";
+	src: url("/fonts/CascadiaCode.woff2") format("woff2");
+	font-weight: 200 700;
 	font-style: normal;
 	font-display: swap;
 }
@@ -24,7 +16,8 @@
 
 html {
 	color-scheme: dark;
-	background-color: #0b0b0b;
+	background-color: var(--bg, #0b0b0b);
+	transition: background-color 0.6s ease;
 }
 
 html,
@@ -34,7 +27,9 @@ body {
 
 body {
 	-webkit-font-smoothing: antialiased;
-	font-family: "Geist", Arial, Helvetica, sans-serif;
+	font-family: "Cascadia Code", "Courier New", Courier, monospace;
+	color: var(--fg, #ffffff);
+	transition: color 0.6s ease;
 }
 
 input,
@@ -52,7 +47,7 @@ h5,
 h6,
 code {
 	overflow-wrap: anywhere;
-	font-family: "Geist Mono", "Courier New", Courier, monospace;
+	font-family: "Cascadia Code", "Courier New", Courier, monospace;
 }
 
 h1,
@@ -78,12 +73,12 @@ p:last-of-type {
 pre,
 pre *,
 code {
-	font-family: "Geist Mono", "Courier New", Courier, monospace;
+	font-family: "Cascadia Code", "Courier New", Courier, monospace;
 	line-height: 1;
 }
 
 pre {
-	border: 1px solid rgb(#353535);
+	border: 1px solid var(--border, #353535);
 	overflow-y: hidden;
 	padding: 0.5rem;
 	border-radius: 0.25rem;

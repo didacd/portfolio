@@ -23,9 +23,16 @@ const {
 const config = defineConfig({
 	site: 'https://didac.domenech.dev',
 	output: 'static',
+	image: {
+		remotePatterns: [{ protocol: 'https', hostname: 'avatars.githubusercontent.com' }],
+	},
 	integrations: [
 		expressiveCode({
 			themes: [spectreDark],
+			styleOverrides: {
+				codeFontFamily: "'Cascadia Code', 'Courier New', Courier, monospace",
+				uiFontFamily: "'Cascadia Code', 'Courier New', Courier, monospace",
+			},
 		}),
 		mdx(),
 		sitemap(),

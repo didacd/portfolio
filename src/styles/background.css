@@ -8,7 +8,7 @@
 	left: 0;
 	transition: all 0.15s ease;
 	opacity: 0;
-	font-family: "Geist Mono", "Courier New", Courier, monospace;
+	font-family: "Cascadia Code", "Courier New", Courier, monospace;
 	user-select: none;
 	pointer-events: none;
 }

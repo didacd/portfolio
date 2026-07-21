@@ -8,8 +8,9 @@ import Card from "../components/Card.astro";
 import Icon from "../components/Icon.astro";
 import ImageGlow from "../components/ImageGlow.astro";
 import Layout from "../layouts/Layout.astro";
+import { getGitHubData } from "../lib/github";
 
-const [posts, projects, about, workExperience, quickInfo, socials] =
+const [posts, projects, about, workExperience, quickInfo, socials, github] =
 	await Promise.all([
 		getCollection("posts", (post) => post.data.draft !== true),
 		getCollection("projects"),
@@ -17,9 +18,24 @@ const [posts, projects, about, workExperience, quickInfo, socials] =
 		getCollection("workExperience"),
 		getCollection("quickInfo"),
 		getCollection("socials"),
+		getGitHubData(),
 	]);
 
 const { Content: About } = await render(about!);
+
+const languageIcons: Record<
+	string,
+	{ type: "lucide" | "simple-icons"; name: string }
+> = {
+	TypeScript: { type: "simple-icons", name: "typescript" },
+	Rust: { type: "simple-icons", name: "rust" },
+	Lua: { type: "simple-icons", name: "lua" },
+	Python: { type: "simple-icons", name: "python" },
+	Nix: { type: "simple-icons", name: "nixos" },
+	HTML: { type: "simple-icons", name: "html5" },
+	CSS: { type: "simple-icons", name: "css3" },
+	Shell: { type: "simple-icons", name: "gnubash" },
+};
 ---
 
 <Layout
@@ -29,14 +45,27 @@ const { Content: About } = await render(about!);
 >
 	<div class="layout-grid-left" slot="left">
 		<Card class="flex-col-card">
-			<ImageGlow
-				quality={100}
-				width={120}
-				height={120}
-				src={ProfilePicture}
-				alt="A purple, minimalist looking ghost."
-				loading="eager"
-			/>
+			{
+				github ? (
+					<ImageGlow
+						quality={100}
+						width={120}
+						height={120}
+						src={github.user.avatar_url}
+						alt="Didac's GitHub profile picture."
+						loading="eager"
+					/>
+				) : (
+					<ImageGlow
+						quality={100}
+						width={120}
+						height={120}
+						src={ProfilePicture}
+						alt="A purple, minimalist looking ghost."
+						loading="eager"
+					/>
+				)
+			}
 			<h2>{name}</h2>
 			<ul class="overview-list">
 				{
@@ -76,6 +105,80 @@ const { Content: About } = await render(about!);
 				}
 			</ul>
 		</Card>
+		{
+			github && (
+				<Card>
+					<h3 class="no-mt">GitHub</h3>
+					<ul class="overview-list">
+						<li>
+							<a href={github.user.html_url} class="socials-link">
+								<Icon
+									type="lucide"
+									name="github"
+									width={24}
+									height={24}
+									class="glow-icon"
+								/>
+								<span>@{github.user.login}</span>
+							</a>
+						</li>
+						<li>
+							<Icon
+								type="lucide"
+								name="calendar"
+								width={24}
+								height={24}
+								class="glow-icon"
+							/>
+							<span>Member since {github.memberSince}</span>
+						</li>
+					</ul>
+					<div class="stats-grid">
+						<div class="stat">
+							<h3 class="text-glow">{github.stats.repos}</h3>
+							<span>Repositories</span>
+						</div>
+						<div class="stat">
+							<h3 class="text-glow">{github.stats.followers}</h3>
+							<span>Followers</span>
+						</div>
+						<div class="stat">
+							<h3 class="text-glow">{github.stats.following}</h3>
+							<span>Following</span>
+						</div>
+						<div class="stat">
+							<h3 class="text-glow">{github.stats.stars}</h3>
+							<span>Stars</span>
+						</div>
+					</div>
+					{github.languages.length > 0 && (
+						<div class="github-languages">
+							<h3 class="no-mt">Top Languages</h3>
+							<ul class="overview-list">
+								{github.languages.map((language) => {
+									const icon = languageIcons[language.name] ?? {
+										type: "lucide" as const,
+										name: "code",
+									};
+									return (
+										<li>
+											<Icon
+												type={icon.type}
+												name={icon.name as any}
+												width={24}
+												height={24}
+												class="glow-icon"
+											/>
+											<span>{language.name}</span>
+										</li>
+									);
+								})}
+							</ul>
+						</div>
+					)}
+				</Card>
+			)
+		}
 	</div>
 	<div class="layout-grid-right" slot="right">
 		<Card>

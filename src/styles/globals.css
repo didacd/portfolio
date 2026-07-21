@@ -5,6 +5,13 @@
 	/* Used for links */
 	--primary-light: #a277ff;
 	--primary-lightest: #c2a8fd;
+	/* Page background. Evolves with the time-of-day theme cycle */
+	--bg: #0b0b0b;
+	/* Text and surfaces. Brighten towards noon, dim towards the night */
+	--fg: #ffffff;
+	--fg-muted: #c7c7c7;
+	--card-bg: #121212;
+	--border: #353535;
 }
 
 .overview-list {
@@ -53,6 +60,9 @@ main {
 .glow-icon {
 	color: var(--primary);
 	filter: drop-shadow(0 0 4px var(--primary));
+	transition:
+		color 0.6s ease,
+		filter 0.6s ease;
 }
 
 .expressive-code {
@@ -94,8 +104,8 @@ main {
 	flex-direction: column;
 	gap: 1rem;
 	padding: 1rem;
-	border: 1px solid #353535;
-	color: #ffffff;
+	border: 1px solid var(--border, #353535);
+	color: var(--fg, #ffffff);
 	text-decoration: none;
 	transition:
 		background-color 0.15s ease,
@@ -106,7 +116,7 @@ main {
 .post-container:focus-visible {
 	background-color: rgba(var(--primary-rgb), 0.125);
 	border: 1px solid var(--primary);
-	color: white;
+	color: var(--fg, #ffffff);
 	text-decoration: none;
 }
 
@@ -125,16 +135,19 @@ main {
 }
 
 .post-date {
-	color: #c7c7c7;
+	color: var(--fg-muted, #c7c7c7);
 }
 
 .text-glow {
 	color: var(--primary);
 	filter: drop-shadow(0 0 12px var(--primary));
+	transition:
+		color 0.6s ease,
+		filter 0.6s ease;
 }
 
 .block-link {
-	color: white;
+	color: var(--fg, #ffffff);
 	padding: 0.25rem 0.5rem;
 }
 

@@ -3,6 +3,22 @@ import { name } from "spectre:globals";
 import Icon from "./Icon.astro";
 
 const path = Astro.url.pathname;
+
+// Hour ticks for the theme dial (every 15deg, longer at the quarter marks).
+// The dial is centered at (100, 110) with radius 80.
+const ticks = Array.from({ length: 24 }, (_, i) => {
+	const angle = (i * 15 * Math.PI) / 180;
+	const cardinal = i % 6 === 0;
+	const r1 = cardinal ? 68 : 74;
+	const r2 = 80;
+	return {
+		x1: (100 + r1 * Math.cos(angle)).toFixed(2),
+		y1: (110 + r1 * Math.sin(angle)).toFixed(2),
+		x2: (100 + r2 * Math.cos(angle)).toFixed(2),
+		y2: (110 + r2 * Math.sin(angle)).toFixed(2),
+		cardinal,
+	};
+});
 ---
 <nav>
   <a class="site-title" href="/">{name}</a>
@@ -19,12 +35,118 @@ const path = Astro.url.pathname;
       <input id="search" type="text" placeholder="Search (Ctrl+K)" />
       <div id="search-results"></div>
     </li>
+    <li class="nav-separator">/</li>
+    <li class="theme-picker">
+      <button id="theme-toggle" aria-label="Change theme" title="Change theme">
+        <Icon type="lucide" name="sun-moon" width={20} height={20} />
+      </button>
+      <div id="theme-popover">
+        <svg
+          id="theme-dial"
+          viewBox="0 0 200 200"
+          role="slider"
+          tabindex="0"
+          aria-label="Time of day"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={50}
+        >
+          <defs>
+            <radialGradient id="dial-ocean" cx="35%" cy="35%" r="80%">
+              <stop offset="0%" stop-color="#4a9edb" />
+              <stop offset="100%" stop-color="#1c4e7e" />
+            </radialGradient>
+            <linearGradient id="dial-terminator" x1="128" y1="110" x2="72" y2="110">
+              <stop offset="0%" stop-color="rgba(2, 6, 18, 0)" />
+              <stop offset="42%" stop-color="rgba(2, 6, 18, 0)" />
+              <stop offset="58%" stop-color="rgba(2, 6, 18, 0.88)" />
+              <stop offset="100%" stop-color="rgba(2, 6, 18, 0.95)" />
+            </linearGradient>
+            <clipPath id="dial-earth-clip">
+              <circle cx="0" cy="0" r="28" />
+            </clipPath>
+          </defs>
+          {
+            ticks.map((tick) => (
+              <line
+                x1={tick.x1}
+                y1={tick.y1}
+                x2={tick.x2}
+                y2={tick.y2}
+                class:list={["dial-tick", { cardinal: tick.cardinal }]}
+              />
+            ))
+          }
+          <circle cx="100" cy="110" r="80" class="dial-ring" />
+          <text x="100" y="51" class="dial-hour" id="dial-hour-noon">12:00</text>
+          <text x="159" y="110" class="dial-hour" id="dial-hour-sunset">18:00</text>
+          <text x="100" y="169" class="dial-hour" id="dial-hour-midnight">0:00</text>
+          <text x="41" y="110" class="dial-hour" id="dial-hour-sunrise">6:00</text>
+          <circle cx="100" cy="110" r="56" class="dial-orbit" />
+          <line x1="30" y1="110" x2="170" y2="110" class="dial-horizon" />
+          <g id="dial-sun" transform="translate(156 110)">
+            <circle r="8" class="dial-sun-core" />
+          </g>
+          <g id="dial-moon" transform="translate(44 110)">
+            <g transform="translate(-7 -7) scale(0.583)">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" class="dial-moon-body" />
+            </g>
+          </g>
+          <circle cx="100" cy="110" r="32" class="dial-atmosphere" />
+          <g transform="translate(100 110)">
+            <circle cx="0" cy="0" r="28" fill="url(#dial-ocean)" />
+            <g clip-path="url(#dial-earth-clip)">
+              <g id="dial-land">
+                <path
+                  d="M -22 -10 Q -12 -20 -3 -12 Q 4 -5 -2 3 Q -11 8 -18 1 Q -26 -4 -22 -10 Z"
+                  class="dial-continent"
+                />
+                <path
+                  d="M 7 -16 Q 19 -19 24 -8 Q 27 1 17 4 Q 8 5 5 -4 Q 3 -11 7 -16 Z"
+                  class="dial-continent"
+                />
+                <path
+                  d="M 3 12 Q 10 10 13 16 Q 11 22 4 21 Q -2 17 3 12 Z"
+                  class="dial-continent"
+                />
+                <path d="M -13 -24 A 28 28 0 0 1 13 -24 Q 0 -17 -13 -24 Z" class="dial-ice" />
+              </g>
+            </g>
+          </g>
+          <circle cx="100" cy="110" r="28" fill="url(#dial-terminator)" />
+        </svg>
+        <span id="theme-phase-label">12:00 · Noon</span>
+        <div class="theme-presets">
+          <button class="theme-preset" data-phase="0.25">
+            <Icon type="lucide" name="sunrise" width={14} height={14} />
+            Sunrise
+          </button>
+          <button class="theme-preset" data-phase="0.5">
+            <Icon type="lucide" name="sun" width={14} height={14} />
+            Noon
+          </button>
+          <button class="theme-preset" data-phase="0.75">
+            <Icon type="lucide" name="sunset" width={14} height={14} />
+            Sunset
+          </button>
+          <button class="theme-preset" data-phase="0">
+            <Icon type="lucide" name="moon" width={14} height={14} />
+            Night
+          </button>
+        </div>
+        <label class="theme-auto">
+          <input type="checkbox" id="theme-auto-check" checked />
+          Follow the sun
+        </label>
+      </div>
+    </li>
   </ul>
   <button class="mobile-nav-toggle" aria-label="Mobile menu trigger">
     <Icon type="lucide" name="menu" width={24} height={24} class="menu-closed" />
     <Icon type="lucide" name="x" width={24} height={24} class="menu-open" />
   </button>
 </nav>
+<script src="../scripts/theme-picker.ts"></script>
 <script is:inline>
   const searchElement = document.querySelector('#search');
   const results = document.querySelector('#search-results');
@@ -161,7 +283,7 @@ const path = Astro.url.pathname;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'Geist Mono', 'Courier New', Courier, monospace;
+    font-family: 'Cascadia Code', 'Courier New', Courier, monospace;
     z-index: 50;
   }
 
@@ -205,7 +327,7 @@ const path = Astro.url.pathname;
   }
 
   #search::placeholder {
-    color: white;
+    color: var(--fg, #ffffff);
   }
 
   #search:focus {
@@ -216,7 +338,7 @@ const path = Astro.url.pathname;
     position: absolute;
     top: calc(100% + .5rem);
     right: 0;
-    background-color: #252525;
+    background-color: var(--card-bg, #252525);
     border: 1px solid var(--primary);
     display: none;
     width: 200%;
@@ -232,12 +354,185 @@ const path = Astro.url.pathname;
     display: none;
     width: 40px;
     height: 40px;
-    background-color: #121212;
-    border: 1px solid #353535;
+    background-color: var(--card-bg, #121212);
+    border: 1px solid var(--border, #353535);
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 2;
+  }
+
+  .theme-picker {
+    display: flex;
+    align-items: center;
+  }
+
+  #theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--fg, #ffffff);
+    cursor: pointer;
+    padding: .25rem .5rem;
+  }
+
+  #theme-toggle:hover,
+  #theme-toggle:focus-visible {
+    background-color: var(--primary);
+    outline: none;
+  }
+
+  #theme-popover {
+    position: absolute;
+    top: calc(100% + .5rem);
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    width: 240px;
+    padding: 1rem;
+    background-color: rgba(10, 10, 10, 0.6);
+    border: 1px solid var(--primary);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 20;
+  }
+
+  #theme-popover.active {
+    display: flex;
+  }
+
+  #theme-dial {
+    width: 100%;
+    height: auto;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  #theme-dial:active {
+    cursor: grabbing;
+  }
+
+  #theme-dial:focus-visible {
+    outline: 1px solid var(--primary);
+  }
+
+  .dial-tick {
+    stroke: var(--border, #353535);
+    stroke-width: 1.5;
+  }
+
+  .dial-tick.cardinal {
+    stroke: var(--primary);
+  }
+
+  .dial-ring {
+    fill: rgba(var(--primary-rgb), 0.05);
+    stroke: var(--border, #353535);
+    stroke-width: 1;
+  }
+
+  .dial-hour {
+    fill: var(--fg-muted, #c7c7c7);
+    font-size: 8px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  .dial-orbit {
+    fill: none;
+    stroke: var(--border, #353535);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+    opacity: .5;
+  }
+
+  .dial-horizon {
+    stroke: var(--border, #353535);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    opacity: .7;
+  }
+
+  #dial-sun,
+  #dial-moon {
+    transition: opacity .3s ease;
+  }
+
+  .dial-sun-core {
+    fill: #ffd75e;
+    filter: drop-shadow(0 0 6px #ffd75e);
+  }
+
+  .dial-moon-body {
+    fill: var(--fg-muted, #c7c7c7);
+  }
+
+  .dial-atmosphere {
+    fill: none;
+    stroke: rgba(120, 180, 255, 0.3);
+    stroke-width: 1.5;
+  }
+
+  .dial-continent {
+    fill: #46a06b;
+  }
+
+  .dial-ice {
+    fill: rgba(255, 255, 255, 0.85);
+  }
+
+  #theme-phase-label {
+    font-size: .875em;
+    color: var(--fg-muted, #c7c7c7);
+  }
+
+  .theme-presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    width: 100%;
+  }
+
+  .theme-preset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    padding: .25rem .5rem;
+    background: none;
+    border: 1px solid var(--border, #353535);
+    color: var(--fg, #ffffff);
+    font: inherit;
+    font-size: .8125em;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+
+  .theme-preset:hover,
+  .theme-preset:focus-visible {
+    border-color: var(--primary);
+    background-color: rgba(var(--primary-rgb), 0.125);
+    outline: none;
+  }
+
+  .theme-auto {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .875em;
+    color: var(--fg-muted, #c7c7c7);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .theme-auto input {
+    accent-color: var(--primary);
+    cursor: pointer;
   }
 
   .menu-open {
@@ -285,20 +580,20 @@ const path = Astro.url.pathname;
     }
 
     nav.active {
-      background-color: #181818;
+      background-color: var(--card-bg, #181818);
     }
 
     nav.active ul {
       opacity: 1;
       pointer-events: all;
-      background-color: #181818;
+      background-color: var(--card-bg, #181818);
     }
 
     nav ul li {
       position: relative;
       transition: all .25s ease-out;
       top: -1.5rem;
-      border-bottom: 1px solid #353535;
+      border-bottom: 1px solid var(--border, #353535);
       width: 100%;
       max-width: none;
       padding: 0;
@@ -313,7 +608,7 @@ const path = Astro.url.pathname;
     }
 
     nav ul li:first-child {
-      border-top: 1px solid #353535;
+      border-top: 1px solid var(--border, #353535);
     }
 
     nav.active ul li {
@@ -337,7 +632,7 @@ const path = Astro.url.pathname;
   #search-results a {
     display: block;
     text-decoration: none;
-    color: white !important;
+    color: var(--fg, #ffffff) !important;
     padding: .5rem;
   }
 
@@ -371,6 +666,6 @@ const path = Astro.url.pathname;
     margin: .5rem .5rem;
     border: none;
     height: 1px;
-    background-color: #353535;
+    background-color: var(--border, #353535);
   }
 </style>

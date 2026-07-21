@@ -13,9 +13,12 @@ const { class: className, ...props } = Astro.props;
   .card {
     width: 100%;
     height: auto;
-    background-color: #121212;
-    border: 1px solid #353535;
+    background-color: var(--card-bg, #121212);
+    border: 1px solid var(--border, #353535);
     padding: 1.5rem;
     overflow: hidden;
+    transition:
+      background-color 0.6s ease,
+      border-color 0.6s ease;
   }
 </style>
