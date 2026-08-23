@@ -1,13 +1,12 @@
 import mdx from '@astrojs/mdx';
 import { unified } from '@astrojs/markdown-remark';
-import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
 import { loadEnv } from 'vite';
 import { readFileSync } from 'node:fs';
 import { load } from 'js-yaml';
-import spectre, { type GiscusMapping } from './package/src';
+import spectre from './package/src';
 import { getCalloutDefinitions, rehypeCallouts } from './src/lib/callouts';
 import { spectreDark } from './src/ec-theme';
 
@@ -74,9 +73,6 @@ const config = defineConfig({
 			}, */
 		}),
 	],
-	adapter: node({
-		mode: 'standalone',
-	}),
 });
 
 export default config;
