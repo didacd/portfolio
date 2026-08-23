@@ -17,5 +17,6 @@ Open the local URL shown in your terminal. Before publishing, edit
 pnpm build
 ```
 
-See [the configuration guide](./docs/configuration.md) for available settings
-and [Astro's documentation](https://docs.astro.build) for deployment.
+See [the configuration guide](./docs/configuration.md) for available settings.
+For GitHub Pages setup and custom-domain configuration, see the
+[deployment guide](./docs/deployment.md).

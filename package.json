@@ -6,16 +6,14 @@
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build",
-		"start": "node dist/server/entry.mjs",
 		"preview": "astro preview",
 		"astro": "astro",
-		"postbuild": "pagefind --site dist/client",
+		"postbuild": "pagefind --site dist",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write ."
 	},
 	"dependencies": {
 		"@astrojs/mdx": "^7.0.7",
-		"@astrojs/node": "^11.1.4",
 		"@astrojs/sitemap": "^3.7.3",
 		"@iconify-json/lucide": "^1.2.20",
 		"@iconify-json/simple-icons": "^1.2.18",
