@@ -2,25 +2,37 @@
 import type { LocalImageProps, RemoteImageProps } from "astro:assets";
 import { Image } from "astro:assets";
 
-type Props = LocalImageProps | RemoteImageProps;
+type Props = (LocalImageProps | RemoteImageProps) & {
+	shape?: "circle";
+};
 
-const { ...props } = Astro.props;
+const { shape, ...props } = Astro.props;
 
 const width = props.width;
 const height = props.height;
 ---
 
-<div class="glow-image">
-  <Image {...props} />
-  <Image
-    width={width ? ((typeof width === 'number' ? width : Number.parseInt(width)) / 4) : undefined} 
-    height={height ? ((typeof height === 'number' ? height : Number.parseInt(height)) / 4) : undefined}
-    {...props}
-    class='glow'
-    class:list={[props.class]}
-    quality={75}
-  />
-</div>
+{
+  shape === "circle" ? (
+    <div class="glow-image glow-image--circle">
+      <div class="glow-image-mask">
+        <Image {...props} />
+      </div>
+    </div>
+  ) : (
+    <div class="glow-image">
+      <Image {...props} />
+      <Image
+        width={width ? ((typeof width === 'number' ? width : Number.parseInt(width)) / 4) : undefined}
+        height={height ? ((typeof height === 'number' ? height : Number.parseInt(height)) / 4) : undefined}
+        {...props}
+        class='glow'
+        class:list={[props.class]}
+        quality={75}
+      />
+    </div>
+  )
+}
 <style>
   .glow-image {
     position: relative;
@@ -38,4 +50,50 @@ const height = props.height;
     z-index: 0 !important;
     filter: blur(8px);
   }
+
+  .glow-image--circle {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    isolation: isolate;
+  }
+
+  .glow-image--circle::before,
+  .glow-image--circle::after {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+  }
+
+  .glow-image--circle::before {
+    inset: -18%;
+    background: radial-gradient(
+      circle,
+      rgb(var(--primary-rgb) / 62%) 0%,
+      rgb(var(--primary-rgb) / 28%) 38%,
+      transparent 70%
+    );
+    filter: blur(0.55rem);
+  }
+
+  .glow-image--circle::after {
+    inset: -0.1rem;
+    border: 1px solid rgb(var(--primary-rgb) / 60%);
+    box-shadow: 0 0 0.7rem rgb(var(--primary-rgb) / 45%);
+  }
+
+  .glow-image-mask {
+    position: relative;
+    z-index: 1;
+    border-radius: 50%;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .glow-image-mask img {
+    display: block;
+  }
+
 </style>

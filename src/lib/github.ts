@@ -27,7 +27,6 @@ export interface GitHubData {
 	memberSince: number;
 }
 
-const GITHUB_USERNAME = "didacd";
 const API_BASE = "https://api.github.com";
 
 async function gh<T>(path: string): Promise<T | null> {
@@ -52,10 +51,12 @@ async function gh<T>(path: string): Promise<T | null> {
 	}
 }
 
-export async function getGitHubData(): Promise<GitHubData | null> {
+export async function getGitHubData(
+	username: string,
+): Promise<GitHubData | null> {
 	const [user, repos] = await Promise.all([
-		gh<GitHubUser>(`/users/${GITHUB_USERNAME}`),
-		gh<GitHubRepo[]>(`/users/${GITHUB_USERNAME}/repos?per_page=100`),
+		gh<GitHubUser>(`/users/${username}`),
+		gh<GitHubRepo[]>(`/users/${username}/repos?per_page=100`),
 	]);
 
 	if (!user) {

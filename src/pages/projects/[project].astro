@@ -4,9 +4,9 @@ import "../../styles/article.css";
 import type { CollectionEntry } from "astro:content";
 import { getCollection, render } from "astro:content";
 import type { GetStaticPaths } from "astro";
+import ArticleHero from "../../components/ArticleHero.astro";
 import Card from "../../components/Card.astro";
 import Icon from "../../components/Icon.astro";
-import ImageGlow from "../../components/ImageGlow.astro";
 import Layout from "../../layouts/Layout.astro";
 
 interface Props {
@@ -63,27 +63,8 @@ const { Content } = await render(project);
 	</div>
 	<article slot="right" data-pagefind-body>
 		<Card>
-			<div class="article-header" id="_top" data-pagefind-ignore>
-				{
-					project.data.image && (
-						<ImageGlow
-							quality={100}
-							class="article-image"
-							src={project.data.image}
-							alt={project.data.title}
-						/>
-					)
-				}
-				<div class="header">
-					<div>
-						<h1 class="no-mt article-h1">{project.data.title}</h1>
-					</div>
-					<div class="article-info">
-						<span>{project.data.date.toLocaleDateString()}</span>
-					</div>
-				</div>
-			</div>
-			<Content />
+			<ArticleHero title={project.data.title} image={project.data.image} meta={[project.data.date.toLocaleDateString()]} />
+			<div class="article-content"><Content /></div>
 			<hr class="end-of-article" />
 			<a href="/projects" class="block-link" data-pagefind-ignore
 				>← Back to projects</a

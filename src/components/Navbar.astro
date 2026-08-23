@@ -1,8 +1,29 @@
 ---
+import { getCollection } from "astro:content";
 import { name } from "spectre:globals";
 import Icon from "./Icon.astro";
 
 const path = Astro.url.pathname;
+const [posts, projects] = await Promise.all([
+	getCollection("posts", (post) => post.data.draft !== true),
+	getCollection("projects"),
+]);
+const searchEntries = [
+	...posts.map((post) => ({
+		title: post.data.title,
+		description: post.data.description,
+		href: `/blog/${post.id}`,
+		type: "Post",
+		keywords: post.data.tags.map((tag) => tag.id).join(" "),
+	})),
+	...projects.map((project) => ({
+		title: project.data.title,
+		description: project.data.description,
+		href: `/projects/${project.id}`,
+		type: "Project",
+		keywords: "",
+	})),
+];
 
 // Hour ticks for the theme dial (every 15deg, longer at the quarter marks).
 // The dial is centered at (100, 110) with radius 80.
@@ -32,8 +53,9 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     </li>
     <li class="nav-separator">/</li>
     <li>
-      <input id="search" type="text" placeholder="Search (Ctrl+K)" />
-      <div id="search-results"></div>
+      <button id="search-toggle" aria-label="Search" title="Search (Ctrl+K)">
+        <Icon type="lucide" name="search" width={20} height={20} />
+      </button>
     </li>
     <li class="nav-separator">/</li>
     <li class="theme-picker">
@@ -146,26 +168,99 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     <Icon type="lucide" name="x" width={24} height={24} class="menu-open" />
   </button>
 </nav>
+<div id="search-dialog" aria-hidden="true">
+  <button id="search-backdrop" aria-label="Close search"></button>
+  <section class="search-panel" role="dialog" aria-modal="true" aria-labelledby="search-title">
+    <div class="search-input-row">
+      <Icon type="lucide" name="search" width={20} height={20} aria-hidden="true" />
+      <input id="search" type="text" placeholder="Search the site" autocomplete="off" />
+      <button id="search-close" aria-label="Close search" title="Close search">
+        <Icon type="lucide" name="x" width={20} height={20} />
+      </button>
+    </div>
+    <p id="search-title" class="search-hint">Search posts and projects <kbd>Esc</kbd> to close</p>
+    <div id="search-results" aria-live="polite"></div>
+  </section>
+</div>
 <script src="../scripts/theme-picker.ts"></script>
-<script is:inline>
+<script is:inline define:vars={{ searchEntries }}>
   const searchElement = document.querySelector('#search');
   const results = document.querySelector('#search-results');
+  const searchDialog = document.querySelector('#search-dialog');
+  const searchToggle = document.querySelector('#search-toggle');
+  const searchClose = document.querySelector('#search-close');
+  const searchBackdrop = document.querySelector('#search-backdrop');
   const navToggle = document.querySelector('.mobile-nav-toggle');
 
   let focusIndex = -1;
+  const renderResults = (query) => {
+    if (!results) return;
+
+    const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    results.replaceChildren();
+    if (terms.length === 0) return;
+
+    const matches = searchEntries
+      .map((entry) => {
+        const searchable = `${entry.title} ${entry.description} ${entry.type} ${entry.keywords}`.toLocaleLowerCase();
+        const score = terms.reduce((total, term) => total + (searchable.includes(term) ? 1 : 0), 0);
+        return { entry, score };
+      })
+      .filter(({ score }) => score === terms.length)
+      .sort((a, b) => a.entry.title.localeCompare(b.entry.title));
+
+    if (matches.length === 0) {
+      const empty = document.createElement('p');
+      empty.textContent = 'No results found';
+      results.append(empty);
+      return;
+    }
+
+    for (const { entry } of matches) {
+      const link = document.createElement('a');
+      const title = document.createElement('h3');
+      const description = document.createElement('p');
+      const type = document.createElement('span');
+
+      link.href = entry.href;
+      title.className = 'no-mt';
+      title.textContent = entry.title;
+      description.textContent = entry.description;
+      type.className = 'search-result-type';
+      type.textContent = entry.type;
+      link.append(title, description, type);
+      results.append(link);
+    }
+  };
+
+  const openSearch = () => {
+    if (!searchDialog || !searchElement) return;
+    searchDialog.classList.add('active');
+    searchDialog.setAttribute('aria-hidden', 'false');
+    searchElement.focus();
+  };
+
+  const closeSearch = () => {
+    if (!searchDialog) return;
+    searchDialog.classList.remove('active');
+    searchDialog.setAttribute('aria-hidden', 'true');
+    focusIndex = -1;
+    searchToggle?.focus();
+  };
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'k' && e.ctrlKey) {
-      searchElement.focus();
+    if (e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      openSearch();
+      return;
     }
 
-    if (e.key === 'Escape') {
-      searchElement.blur();
-      results.classList.remove('active');
-      focusIndex = -1;
+    if (e.key === 'Escape' && searchDialog?.classList.contains('active')) {
+      closeSearch();
+      return;
     }
 
-    if (e.key === 'ArrowDown') {
+    if (e.key === 'ArrowDown' && searchDialog?.classList.contains('active')) {
       e.preventDefault();
 
       focusIndex++;
@@ -178,7 +273,7 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
       results[focusIndex]?.focus();
     }
 
-    if (e.key === 'ArrowUp') {
+    if (e.key === 'ArrowUp' && searchDialog?.classList.contains('active')) {
       e.preventDefault();
 
       focusIndex--;
@@ -192,91 +287,17 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     }
   });
 
-  let pagefindInitialized = false;
+  searchElement?.addEventListener('input', (e) => renderResults(e.target.value));
 
-  searchElement?.addEventListener('focus', async () => {
-    searchElement.placeholder = '';
-    results.classList.add('active');
-    
-    // initialize pagefind on first focus
-    if (!pagefindInitialized) {
-      try {
-        window.pagefind = await import("/pagefind/pagefind.js");
-        await window.pagefind.init();
-        pagefindInitialized = true;
-      } catch (error) {
-        console.error('Failed to initialize Pagefind:', error);
-      }
-    }
-  });
-  
-  searchElement?.addEventListener('blur', () => {
-    handleTabletChange();
-    setTimeout(() => {
-      if (!document.activeElement?.closest('#search-results')) {
-        results.classList.remove('active');
-        focusIndex = -1;
-      }
-    }, 1);
-  });
-
-  results?.addEventListener('focusout', (e) => {
-    if (!e.relatedTarget?.closest('#search-results')) {
-      results.classList.remove('active');
-      focusIndex = -1;
-    }
-  });
-
-  searchElement?.addEventListener('input', async (e) => {
-    // only search if Pagefind is ready
-    if (!pagefindInitialized) {
-      return;
-    }
-
-    results.innerHTML = '';
-    let searchResultHtml = '';
-
-    const search = await window.pagefind.search(e.target.value);
-
-    let i = 0;
-    for (const result of search.results) {
-      i++;
-
-      const data = await result.data();
-      
-      searchResultHtml += `
-        <a href="${data.url}">
-          <h3 class="no-mt">${data.meta.title}</h3>
-          <p>${data.excerpt}</p>
-        </a>
-        ${i < search.results.length ? '<hr class="separator">' : ''}
-      `;
-    }
-
-    if (search.results.length === 0 && e.target.value.length > 0) {
-      results.innerHTML = '<p style="margin-top: 0;">No results found</p>';
-    } else {
-      results.innerHTML = searchResultHtml;
-    }
-
-    results.classList.add('active');
-  });
+  searchToggle?.addEventListener('click', openSearch);
+  searchClose?.addEventListener('click', closeSearch);
+  searchBackdrop?.addEventListener('click', closeSearch);
 
   navToggle?.addEventListener('click', () => {
     navToggle.classList.toggle('active');
     document.querySelector('nav').classList.toggle('active');
   });
 
-  const handleTabletChange = () => {
-    if (window.matchMedia('(max-width: 640px)').matches) {
-      searchElement.placeholder = 'Search';
-    } else {
-      searchElement.placeholder = 'Search (Ctrl+K)';
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', handleTabletChange);
-  document.addEventListener('resize', handleTabletChange);
 </script>
 <style>
   nav {
@@ -291,6 +312,8 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     font-weight: 800;
     text-decoration: none;
     font-size: 1.25em;
+    color: var(--heading);
+    letter-spacing: -0.04em;
     z-index: 2;
   }
 
@@ -311,55 +334,33 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     color: inherit;
     text-decoration: none;
     padding: .25rem .5rem;
+    border-radius: 999px;
+    transition: color .2s ease, text-shadow .2s ease;
   }
 
-  nav a:hover, nav a:focus-visible, nav a.active {
-    background-color: var(--primary);
-    outline: none;
+  nav a:hover,
+  nav a.active {
+    color: var(--fg);
+    text-shadow: 0 0 .8rem rgb(var(--primary-rgb) / 75%);
   }
 
-  #search {
-    background: none;
-    border: none;
-    outline: none;
-    padding: .25rem .5rem;
-    width: 160px;
-  }
-
-  #search::placeholder {
-    color: var(--fg, #ffffff);
-  }
-
-  #search:focus {
-    background-color: var(--primary);
-  }
-
-  #search-results {
-    position: absolute;
-    top: calc(100% + .5rem);
-    right: 0;
-    background-color: var(--card-bg, #252525);
-    border: 1px solid var(--primary);
-    display: none;
-    width: 200%;
-    z-index: 10;
-    padding: .5rem;
-  }
-
-  #search-results.active:has(*) {
-    display: block;
+  nav a:focus-visible {
+    color: var(--fg);
+    outline: 2px solid var(--focus-ring);
+    outline-offset: .2rem;
   }
 
   .mobile-nav-toggle {
     display: none;
     width: 40px;
     height: 40px;
-    background-color: var(--card-bg, #121212);
-    border: 1px solid var(--border, #353535);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 2;
+    border-radius: var(--radius-sm);
   }
 
   .theme-picker {
@@ -367,21 +368,137 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     align-items: center;
   }
 
+  #search-toggle,
   #theme-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
     background: none;
     border: none;
-    color: var(--fg, #ffffff);
+    border-radius: 999px;
+    color: var(--fg);
     cursor: pointer;
     padding: .25rem .5rem;
+    overflow: visible;
   }
 
+  #search-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--fg-muted);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  #search-toggle svg,
+  #theme-toggle svg,
+  #search-close svg { display: block; flex: none; }
+
+  #search-toggle:hover,
+  #search-toggle:focus-visible,
   #theme-toggle:hover,
-  #theme-toggle:focus-visible {
-    background-color: var(--primary);
+  #theme-toggle:focus-visible,
+  #search-close:hover,
+  #search-close:focus-visible {
+    background-color: transparent;
+    color: var(--fg);
+    box-shadow: var(--interaction-glow);
     outline: none;
+  }
+
+  #search-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: start center;
+    padding: min(14vh, 8rem) var(--space-3) var(--space-3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+
+  #search-dialog.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #search-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: color-mix(in srgb, var(--bg) 76%, transparent);
+    backdrop-filter: blur(0.35rem);
+    -webkit-backdrop-filter: blur(0.35rem);
+    cursor: default;
+  }
+
+  .search-panel {
+    position: relative;
+    width: min(42rem, 100%);
+    max-height: min(38rem, calc(100vh - 2rem));
+    overflow: auto;
+    background: var(--card-bg);
+    border: 1px solid color-mix(in srgb, var(--border) 55%, var(--primary));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .search-input-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    border-bottom: 1px solid var(--border);
+    color: var(--primary);
+  }
+
+  #search {
+    min-width: 0;
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+  }
+
+  #search::placeholder { color: var(--fg-muted); }
+
+  .search-hint {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    color: var(--fg-muted);
+    font-size: .8125rem;
+  }
+
+  kbd {
+    padding: .125rem .375rem;
+    border: 1px solid var(--border);
+    border-radius: .25rem;
+    background: var(--surface-raised);
+    color: var(--fg);
+    font: inherit;
+    font-size: .75rem;
+  }
+
+  #search-results {
+    min-height: 0;
+    padding: 0 var(--space-2) var(--space-2);
+  }
+
+  #search-results:empty::before {
+    content: "Start typing to search";
+    display: block;
+    padding: var(--space-3);
+    color: var(--fg-muted);
+    font-size: .875rem;
   }
 
   #theme-popover {
@@ -394,11 +511,13 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     gap: .75rem;
     width: 240px;
     padding: 1rem;
-    background-color: rgba(10, 10, 10, 0.6);
+    background-color: color-mix(in srgb, var(--card-bg) 90%, transparent);
     border: 1px solid var(--primary);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     z-index: 20;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-hover);
   }
 
   #theme-popover.active {
@@ -422,7 +541,7 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
   }
 
   .dial-tick {
-    stroke: var(--border, #353535);
+    stroke: var(--border);
     stroke-width: 1.5;
   }
 
@@ -432,12 +551,12 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
 
   .dial-ring {
     fill: rgba(var(--primary-rgb), 0.05);
-    stroke: var(--border, #353535);
+    stroke: var(--border);
     stroke-width: 1;
   }
 
   .dial-hour {
-    fill: var(--fg-muted, #c7c7c7);
+    fill: var(--fg-muted);
     font-size: 8px;
     text-anchor: middle;
     dominant-baseline: central;
@@ -445,14 +564,14 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
 
   .dial-orbit {
     fill: none;
-    stroke: var(--border, #353535);
+    stroke: var(--border);
     stroke-width: 1;
     stroke-dasharray: 2 5;
     opacity: .5;
   }
 
   .dial-horizon {
-    stroke: var(--border, #353535);
+    stroke: var(--border);
     stroke-width: 1;
     stroke-dasharray: 3 4;
     opacity: .7;
@@ -469,7 +588,7 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
   }
 
   .dial-moon-body {
-    fill: var(--fg-muted, #c7c7c7);
+    fill: var(--fg-muted);
   }
 
   .dial-atmosphere {
@@ -488,7 +607,7 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
 
   #theme-phase-label {
     font-size: .875em;
-    color: var(--fg-muted, #c7c7c7);
+    color: var(--fg-muted);
   }
 
   .theme-presets {
@@ -505,8 +624,9 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     gap: .35rem;
     padding: .25rem .5rem;
     background: none;
-    border: 1px solid var(--border, #353535);
-    color: var(--fg, #ffffff);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
     font: inherit;
     font-size: .8125em;
     cursor: pointer;
@@ -515,8 +635,9 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
 
   .theme-preset:hover,
   .theme-preset:focus-visible {
-    border-color: var(--primary);
-    background-color: rgba(var(--primary-rgb), 0.125);
+    border-color: color-mix(in srgb, var(--border) 45%, var(--primary));
+    background-color: transparent;
+    box-shadow: var(--interaction-glow);
     outline: none;
   }
 
@@ -525,7 +646,7 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     align-items: center;
     gap: .5rem;
     font-size: .875em;
-    color: var(--fg-muted, #c7c7c7);
+    color: var(--fg-muted);
     cursor: pointer;
     user-select: none;
   }
@@ -547,8 +668,9 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
     display: none;
   }
 
-  @media screen and (max-width: 640px) {
+  @media screen and (max-width: 720px) {
     nav {
+      position: relative;
       padding: 0 1rem;
       padding-top: 1rem;
       transition: all .25s ease;
@@ -564,90 +686,111 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
 
     nav ul {
       flex-direction: column;
-      gap: 0;
-      position: absolute;
-      width: 100%;
-      top: calc(1rem + 40px);
-      right: 0;
-      padding: 1rem;
-      z-index: 1;
+      gap: .25rem;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: min(calc(100vw - 2rem), 22rem);
+      max-height: calc(100dvh - 2rem);
+      height: auto;
+      padding: var(--space-2);
+      z-index: 60;
       opacity: 0;
       pointer-events: none;
-      transition: all .25s ease;
+      transform: translate(-50%, calc(-50% - .75rem));
+      transition: opacity .2s ease, transform .2s ease, background-color .6s ease;
       user-select: none;
-      height: calc(100vh - 1rem - 40px);
-      align-items: start;
+      align-items: stretch;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-lg);
+      overflow-y: auto;
     }
 
     nav.active {
-      background-color: var(--card-bg, #181818);
+      background: transparent;
     }
 
     nav.active ul {
       opacity: 1;
       pointer-events: all;
-      background-color: var(--card-bg, #181818);
+      transform: translate(-50%, -50%);
+      background-color: color-mix(in srgb, var(--card-bg) 94%, var(--primary));
+      border: 1px solid color-mix(in srgb, var(--border) 55%, var(--primary));
+      box-shadow: var(--shadow-soft), var(--interaction-glow);
+      backdrop-filter: blur(1rem);
+      -webkit-backdrop-filter: blur(1rem);
     }
 
     nav ul li {
       position: relative;
-      transition: all .25s ease-out;
-      top: -1.5rem;
-      border-bottom: 1px solid var(--border, #353535);
+      transition: transform .2s ease, opacity .2s ease;
+      transform: translateY(-.5rem);
+      opacity: 0;
       width: 100%;
       max-width: none;
       padding: 0;
-      font-size: 1.125em;
+      font-size: 1em;
     }
   
-    nav ul li a {
-      display: block;
-      padding: .75rem 0;
+    nav ul li a,
+    nav ul li #search-toggle,
+    nav ul li #theme-toggle {
+      display: flex;
+      align-items: center;
+      min-height: 3rem;
+      padding: .75rem 1rem;
       width: 100%;
-      padding-left: 1rem;
+      border-radius: var(--radius-sm);
     }
 
-    nav ul li:first-child {
-      border-top: 1px solid var(--border, #353535);
+    nav ul li a:hover,
+    nav ul li #search-toggle:hover,
+    nav ul li #theme-toggle:hover {
+      background: var(--surface-interactive);
     }
 
     nav.active ul li {
-      top: 0;
+      transform: translateY(0);
+      opacity: 1;
     }
 
-    #search {
-      width: 100%;
-      max-width: none;
-      padding: .75rem 1rem;
+    .mobile-nav-toggle.active {
+      background: var(--surface-raised);
+      border-color: var(--primary);
+      box-shadow: var(--interaction-glow);
     }
 
-    #search-results {
-      width: 100%;
-      top: 100%;
-      font-size: 0.875em;
-    }
   }
 </style>
 <style is:global>
   #search-results a {
     display: block;
     text-decoration: none;
-    color: var(--fg, #ffffff) !important;
+    color: var(--fg) !important;
     padding: .5rem;
+    border-radius: var(--radius-sm);
   }
 
   #search-results a:hover, #search-results a:focus-visible {
-    background-color: var(--primary);
+    background-color: transparent;
+    color: var(--fg) !important;
+    box-shadow: var(--interaction-glow);
     outline: none;
   }
 
   #search-results a:hover mark, #search-results a:focus-visible mark {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: var(--primary);
+    color: var(--on-primary);
   }
 
   #search-results a h3 {
     margin-bottom: .5rem;
+  }
+
+  .search-result-type {
+    color: var(--fg-muted);
+    font-size: .75rem;
   }
 
   #search-results a p {
@@ -659,13 +802,13 @@ const ticks = Array.from({ length: 24 }, (_, i) => {
 
   #search-results mark {
     background-color: var(--primary);
-    color: white;
+    color: var(--on-primary);
   }
 
   .separator {
     margin: .5rem .5rem;
     border: none;
     height: 1px;
-    background-color: var(--border, #353535);
+    background-color: var(--border);
   }
 </style>

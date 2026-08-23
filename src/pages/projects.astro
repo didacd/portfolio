@@ -4,7 +4,8 @@ import "../styles/article-list.css";
 import { getCollection } from "astro:content";
 import { openGraph } from "spectre:globals";
 import Card from "../components/Card.astro";
-import Icon from "../components/Icon.astro";
+import EntryPreview from "../components/EntryPreview.astro";
+import SectionHeader from "../components/SectionHeader.astro";
 import Layout from "../layouts/Layout.astro";
 
 const projects = await getCollection("projects");
@@ -27,20 +28,9 @@ const projects = await getCollection("projects");
   </div>
   <div class="layout-grid-right" slot="right">
 		<Card>
-			<div class="header-container">
-				<Icon type='lucide' name="folder-git" width={24} height={24} class='glow-icon' />
-				<h2>Latest Projects</h2>
-			</div>
+			<SectionHeader title="All Projects" icon={{ type: "lucide", name: "folder-git" }} />
 			<div class="content-container">
-				{projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).map((post) => (
-					<a href={`/projects/${post.id}`} class="post-container">
-						<div class="post-header">
-							<h3>{post.data.title}</h3>
-							<span class="post-date">{post.data.date.toLocaleDateString()}</span>
-						</div>
-						<span>{post.data.description}</span>
-					</a>
-				))}
+				{projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).map((project) => <EntryPreview href={`/projects/${project.id}`} title={project.data.title} description={project.data.description} meta={project.data.date.toLocaleDateString()} />)}
 			</div>
 		</Card>
   </div>

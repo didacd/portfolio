@@ -1,0 +1,43 @@
+profile:
+  github:
+    username: didacd
+  socials:
+    - id: 1
+      icon:
+        type: lucide
+        name: github
+      text: GitHub
+      link: https://github.com/didacd
+    - id: 2
+      icon:
+        type: simple-icons
+        name: mastodon
+      text: Mastodon
+      link: https://mastodon.social/@didacdomenech
+    - id: 3
+      icon:
+        type: lucide
+        name: at-sign
+      text: Mailbox
+      link: mailto:business@didacdomenech.com
+  callouts:
+    note:
+      icon: sticky-note
+      title: Note
+      color: "#8c5cf5"
+    info:
+      icon: info
+      title: Info
+      color: "#38bdf8"
+    tip:
+      icon: lightbulb
+      title: Tip
+      color: "#84cc16"
+    warning:
+      icon: triangle-alert
+      title: Warning
+      color: "#f59e0b"
+    danger:
+      icon: octagon-alert
+      title: Danger
+      color: "#f87171"
