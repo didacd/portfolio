@@ -43,42 +43,42 @@ export const THEME_KEYFRAMES: ThemeKeyframe[] = [
 	{
 		t: 0,
 		name: "Night",
-		primary: [252, 60, 50],
-		bg: [245, 25, 4],
-		fg: [240, 12, 72],
-		fgMuted: [240, 8, 50],
-		cardBg: [240, 10, 6],
-		border: [240, 8, 14],
+		primary: [252, 76, 64],
+		bg: [244, 34, 7],
+		fg: [238, 26, 92],
+		fgMuted: [238, 14, 63],
+		cardBg: [242, 23, 11],
+		border: [242, 19, 23],
 	},
 	{
 		t: 0.25,
 		name: "Sunrise",
-		primary: [12, 90, 58],
-		bg: [18, 28, 6],
-		fg: [30, 30, 93],
-		fgMuted: [25, 15, 66],
-		cardBg: [20, 14, 8],
-		border: [20, 12, 20],
+		primary: [28, 92, 63],
+		bg: [24, 42, 7],
+		fg: [30, 34, 96],
+		fgMuted: [25, 18, 69],
+		cardBg: [22, 25, 11],
+		border: [22, 21, 22],
 	},
 	{
 		t: 0.5,
 		name: "Noon",
-		primary: [200, 90, 62],
-		bg: [205, 18, 7],
-		fg: [210, 25, 98],
-		fgMuted: [210, 10, 74],
-		cardBg: [215, 12, 9],
-		border: [210, 10, 24],
+		primary: [195, 88, 48],
+		bg: [205, 34, 7],
+		fg: [205, 31, 97],
+		fgMuted: [205, 15, 66],
+		cardBg: [205, 27, 11],
+		border: [205, 21, 22],
 	},
 	{
 		t: 0.75,
 		name: "Sunset",
-		primary: [335, 85, 60],
-		bg: [330, 22, 5],
-		fg: [335, 20, 92],
-		fgMuted: [330, 10, 64],
-		cardBg: [330, 12, 7],
-		border: [330, 10, 19],
+		primary: [340, 88, 64],
+		bg: [330, 36, 7],
+		fg: [332, 29, 96],
+		fgMuted: [330, 14, 67],
+		cardBg: [330, 24, 11],
+		border: [330, 20, 23],
 	},
 ];
 
@@ -481,17 +481,45 @@ export function applyPhase(t: number): void {
 	];
 
 	const primaryRgb = hslToRgb(primary);
+	const heading: Hsl = [
+		primary[0],
+		clamp(primary[1] - 30, 0, 100),
+		clamp(primary[2] + 14, 64, 80),
+	];
+	const gradientStart: Hsl = [
+		palette.bg[0],
+		clamp(palette.bg[1] + 8, 0, 100),
+		clamp(palette.bg[2] + 4, 0, 18),
+	];
+	const gradientEnd: Hsl = [
+		lerpHue(palette.bg[0], primary[0], 0.16),
+		clamp(palette.bg[1] + 12, 0, 100),
+		clamp(palette.bg[2] + 2, 0, 15),
+	];
 
 	const vars: Record<string, string> = {
 		"--primary": rgbToHex(primaryRgb),
 		"--primary-rgb": primaryRgb.join(", "),
 		"--primary-light": rgbToHex(hslToRgb(light)),
 		"--primary-lightest": rgbToHex(hslToRgb(lightest)),
+		"--heading": rgbToHex(hslToRgb(heading)),
+		"--on-primary": palette.primary[2] > 58 ? "#0b1020" : "#ffffff",
 		"--bg": rgbToHex(hslToRgb(palette.bg)),
+		"--bg-start": rgbToHex(hslToRgb(gradientStart)),
+		"--bg-end": rgbToHex(hslToRgb(gradientEnd)),
+		"--daylight-glow": `rgb(${primaryRgb.join(" ")} / 11%)`,
+		"--daylight-glow-secondary": `rgb(${primaryRgb.join(" ")} / 6%)`,
 		"--fg": rgbToHex(hslToRgb(palette.fg)),
 		"--fg-muted": rgbToHex(hslToRgb(palette.fgMuted)),
 		"--card-bg": rgbToHex(hslToRgb(palette.cardBg)),
+		"--surface-raised": `color-mix(in srgb, ${rgbToHex(hslToRgb(palette.cardBg))} 97%, ${rgbToHex(primaryRgb)})`,
+		"--surface-interactive": `color-mix(in srgb, ${rgbToHex(hslToRgb(palette.cardBg))} 91%, ${rgbToHex(primaryRgb)})`,
+		"--primary-subtle": `rgb(${primaryRgb.join(" ")} / 10%)`,
 		"--border": rgbToHex(hslToRgb(palette.border)),
+		"--focus-ring": `rgb(${primaryRgb.join(" ")} / 55%)`,
+		"--shadow-soft": "0 0.5rem 1.5rem rgb(0 0 0 / 8%)",
+		"--shadow-hover": "0 0.75rem 2rem rgb(0 0 0 / 12%)",
+		"--interaction-glow": `0 0 1rem rgb(${primaryRgb.join(" ")} / 35%)`,
 	};
 
 	const root = document.documentElement;

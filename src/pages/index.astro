@@ -5,21 +5,24 @@ import { getCollection, getEntry, render } from "astro:content";
 import { name, openGraph } from "spectre:globals";
 import ProfilePicture from "../assets/pfp.png";
 import Card from "../components/Card.astro";
+import EntryPreview from "../components/EntryPreview.astro";
 import Icon from "../components/Icon.astro";
 import ImageGlow from "../components/ImageGlow.astro";
+import SectionHeader from "../components/SectionHeader.astro";
 import Layout from "../layouts/Layout.astro";
 import { getGitHubData } from "../lib/github";
 
-const [posts, projects, about, workExperience, quickInfo, socials, github] =
+const [posts, projects, about, workExperience, quickInfo, site] =
 	await Promise.all([
 		getCollection("posts", (post) => post.data.draft !== true),
 		getCollection("projects"),
 		getEntry("other", "about"),
 		getCollection("workExperience"),
 		getCollection("quickInfo"),
-		getCollection("socials"),
-		getGitHubData(),
+		getEntry("site", "profile"),
 	]);
+
+const github = site ? await getGitHubData(site.data.github.username) : null;
 
 const { Content: About } = await render(about!);
 
@@ -48,6 +51,7 @@ const languageIcons: Record<
 			{
 				github ? (
 					<ImageGlow
+						shape="circle"
 						quality={100}
 						width={120}
 						height={120}
@@ -57,6 +61,7 @@ const languageIcons: Record<
 					/>
 				) : (
 					<ImageGlow
+						shape="circle"
 						quality={100}
 						width={120}
 						height={120}
@@ -88,17 +93,17 @@ const languageIcons: Record<
 			<h3 class="no-mt">Socials</h3>
 			<ul class="overview-list">
 				{
-					socials.map((item) => (
+					site?.data.socials.map((item) => (
 						<li>
-							<a href={item.data.link} class="socials-link">
+							<a href={item.link} class="socials-link">
 								<Icon
-									type={item.data.icon.type}
-									name={item.data.icon.name as any}
+									type={item.icon.type}
+									name={item.icon.name as any}
 									width={24}
 									height={24}
 									class="glow-icon"
 								/>
-								<span>{item.data.text}</span>
+								<span>{item.text}</span>
 							</a>
 						</li>
 					))
@@ -182,31 +187,13 @@ const languageIcons: Record<
 	</div>
 	<div class="layout-grid-right" slot="right">
 		<Card>
-			<div class="header-container">
-				<Icon
-					type="lucide"
-					name="user"
-					width={24}
-					height={24}
-					class="glow-icon"
-				/>
-				<h2>About me</h2>
-			</div>
+			<SectionHeader title="About me" icon={{ type: "lucide", name: "user" }} />
 			<div class="prose">
 				<About />
 			</div>
 		</Card>
 		<Card>
-			<div class="header-container">
-				<Icon
-					type="lucide"
-					name="rss"
-					width={24}
-					height={24}
-					class="glow-icon"
-				/>
-				<h2>Latest Posts</h2>
-			</div>
+			<SectionHeader title="Latest Posts" icon={{ type: "lucide", name: "rss" }} />
 			<div class="content-container">
 				{
 					posts
@@ -214,61 +201,23 @@ const languageIcons: Record<
 							(a, b) => b.data.createdAt.getTime() - a.data.createdAt.getTime(),
 						)
 						.slice(0, 2)
-						.map((post) => (
-							<a href={`/blog/${post.id}`} class="post-container">
-								<div class="post-header">
-									<h3>{post.data.title}</h3>
-									<span class="post-date">
-										{post.data.createdAt.toLocaleDateString()}
-									</span>
-								</div>
-								<span>{post.data.description}</span>
-							</a>
-						))
+						.map((post) => <EntryPreview href={`/blog/${post.id}`} title={post.data.title} description={post.data.description} meta={post.data.createdAt.toLocaleDateString()} tags={post.data.tags.map((tag) => tag.id)} />)
 				}
 			</div>
 		</Card>
 		<Card>
-			<div class="header-container">
-				<Icon
-					type="lucide"
-					name="folder-git"
-					width={24}
-					height={24}
-					class="glow-icon"
-				/>
-				<h2>Latest Projects</h2>
-			</div>
+			<SectionHeader title="Latest Projects" icon={{ type: "lucide", name: "folder-git" }} />
 			<div class="content-container">
 				{
 					projects
 						.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 						.slice(0, 2)
-						.map((project) => (
-							<a href={`/projects/${project.id}`} class="post-container">
-								<div class="post-header">
-									<h3>{project.data.title}</h3>
-									<span class="post-date">
-										{project.data.date.toLocaleDateString()}
-									</span>
-								</div>
-								<span>{project.data.description}</span>
-							</a>
-						))
+						.map((project) => <EntryPreview href={`/projects/${project.id}`} title={project.data.title} description={project.data.description} meta={project.data.date.toLocaleDateString()} />)
 				}
 			</div>
 		</Card>
 		<Card>
-			<div class="header-container">
-				<Icon
-					type="lucide"
-					name="briefcase-business"
-					width={24}
-					height={24}
-					class="glow-icon"
-				/>
-				<h2>Work Experience</h2>
-			</div>
+			<SectionHeader title="Work Experience" icon={{ type: "lucide", name: "briefcase-business" }} />
 			<div class="work-experience-container">
 				{
 					workExperience.reverse().map((entry) => (

@@ -1,0 +1,40 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"a"> {
+	href: string;
+	title: string;
+	description: string;
+	meta: string;
+	tags?: string[];
+}
+
+const { href, title, description, meta, tags = [], ...props } = Astro.props;
+---
+
+<a href={href} class="post-container" {...props}>
+	<div class="post-header">
+		<h3>{title}</h3>
+		<span class="post-date">{meta}</span>
+	</div>
+	<span>{description}</span>
+	{tags.length > 0 && <span class="entry-tags">{tags.join(" · ")}</span>}
+</a>
+
+<style>
+	.post-header h3 {
+		color: color-mix(in srgb, var(--heading) 80%, var(--primary));
+		transition: color 0.2s ease, text-shadow 0.2s ease;
+	}
+
+	.post-container:hover .post-header h3,
+	.post-container:focus-visible .post-header h3 {
+		color: var(--primary-lightest);
+		text-shadow: 0 0 0.8rem rgb(var(--primary-rgb) / 38%);
+	}
+
+	.entry-tags {
+		color: var(--fg-muted);
+		font-size: 0.8125rem;
+	}
+</style>

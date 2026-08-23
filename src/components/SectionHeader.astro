@@ -1,0 +1,43 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+	title: string;
+	icon?: { type: "lucide" | "simple-icons"; name: string };
+}
+
+const { title, icon } = Astro.props;
+---
+
+<div class="section-header">
+	{icon && <Icon type={icon.type} name={icon.name as any} width={24} height={24} class="glow-icon" />}
+	<h2>{title}</h2>
+</div>
+
+<style>
+	.section-header {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-bottom: var(--space-3);
+	}
+
+	.section-header :global(*) { margin: 0; }
+
+	.section-header :global(.glow-icon) {
+		box-sizing: content-box !important;
+		display: block;
+		flex: 0 0 1.5rem;
+		padding: 0.5rem;
+		border: 1px solid color-mix(in srgb, var(--primary) 42%, var(--border));
+		border-radius: var(--radius-sm);
+		background: var(--primary-subtle);
+	}
+
+	.section-header h2 {
+		color: var(--heading);
+		font-size: clamp(1.1rem, 2vw, 1.35rem);
+		letter-spacing: -0.035em;
+		text-shadow: 0 0 1.25rem var(--primary-subtle);
+	}
+</style>

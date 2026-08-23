@@ -1,10 +1,14 @@
 import mdx from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
 import { loadEnv } from 'vite';
+import { readFileSync } from 'node:fs';
+import { load } from 'js-yaml';
 import spectre, { type GiscusMapping } from './package/src';
+import { getCalloutDefinitions, rehypeCallouts } from './src/lib/callouts';
 import { spectreDark } from './src/ec-theme';
 
 const {
@@ -19,10 +23,16 @@ const {
 	GISCUS_LANG,
 } = loadEnv(process.env.NODE_ENV!, process.cwd(), '');
 
+const siteConfig = load(readFileSync(new URL('./src/config/site.yaml', import.meta.url), 'utf8'));
+const callouts = getCalloutDefinitions(siteConfig);
+
 // https://astro.build/config
 const config = defineConfig({
 	site: 'https://didac.domenech.dev',
 	output: 'static',
+	markdown: {
+		processor: unified({ rehypePlugins: [[rehypeCallouts, callouts]] }),
+	},
 	image: {
 		remotePatterns: [{ protocol: 'https', hostname: 'avatars.githubusercontent.com' }],
 	},
@@ -37,7 +47,7 @@ const config = defineConfig({
 		mdx(),
 		sitemap(),
 		spectre({
-			name: '🍱 Didac\'s Box',
+			name: 'Arcanum',
 			openGraph: {
 				home: {
 					title: 'Home',

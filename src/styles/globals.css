@@ -1,17 +1,37 @@
 :root {
 	--primary: #8c5cf5;
-	/* Needed for some hover effects. This is just the R, G and B values of the hex color above */
 	--primary-rgb: 140, 92, 245;
-	/* Used for links */
 	--primary-light: #a277ff;
 	--primary-lightest: #c2a8fd;
-	/* Page background. Evolves with the time-of-day theme cycle */
+	--heading: #d8c8ff;
+	--on-primary: #ffffff;
 	--bg: #0b0b0b;
-	/* Text and surfaces. Brighten towards noon, dim towards the night */
+	--bg-start: #12101a;
+	--bg-end: #0d0c12;
+	--daylight-glow: rgb(140 92 245 / 11%);
+	--daylight-glow-secondary: rgb(140 92 245 / 6%);
 	--fg: #ffffff;
 	--fg-muted: #c7c7c7;
 	--card-bg: #121212;
+	--surface-raised: #17151d;
+	--surface-interactive: #211c30;
+	--primary-subtle: rgb(140 92 245 / 16%);
 	--border: #353535;
+	--focus-ring: rgb(140 92 245 / 55%);
+	--shadow-soft: 0 0.5rem 1.5rem rgb(0 0 0 / 8%);
+	--shadow-hover: 0 0.75rem 2rem rgb(0 0 0 / 12%);
+	--interaction-glow: 0 0 1rem rgb(140 92 245 / 35%);
+	--radius-sm: 0.5rem;
+	--radius-md: 0.875rem;
+	--radius-lg: 1.25rem;
+	--radius-xl: 1.75rem;
+	--space-1: 0.5rem;
+	--space-2: 0.75rem;
+	--space-3: 1rem;
+	--space-4: 1.5rem;
+	--space-5: 2rem;
+	--content-width: 78rem;
+	--sidebar-width: minmax(16rem, 0.42fr);
 }
 
 .overview-list {
@@ -43,23 +63,42 @@ a:hover {
 	text-decoration: underline;
 }
 
+h1,
+h2,
+h3,
+h4 {
+	color: var(--fg);
+}
+
+:focus-visible {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: 3px;
+}
+
 .no-mt {
 	margin-top: 0;
 }
 
+.card > :is(h2, h3).no-mt {
+	color: var(--heading);
+	letter-spacing: -0.03em;
+}
+
 main {
 	width: 100%;
-	max-width: 1280px;
+	max-width: var(--content-width);
 	margin: 0 auto;
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
-	padding: 2rem 0;
+	gap: var(--space-5);
+	padding: var(--space-5) var(--space-4);
 }
 
 .glow-icon {
 	color: var(--primary);
-	filter: drop-shadow(0 0 4px var(--primary));
+	filter: drop-shadow(
+		0 0 0.2rem color-mix(in srgb, var(--primary) 55%, transparent)
+	);
 	transition:
 		color 0.6s ease,
 		filter 0.6s ease;
@@ -67,57 +106,122 @@ main {
 
 .expressive-code {
 	margin-top: 1rem;
+	--ec-brdRad: var(--radius-md);
+	--ec-brdWd: 1px;
+	--ec-brdCol: color-mix(in srgb, var(--border) 70%, var(--primary));
+	--ec-codeBg: color-mix(in srgb, var(--card-bg) 94%, var(--primary));
+	--ec-focusBrd: var(--focus-ring);
+	--ec-sbThumbCol: rgb(var(--primary-rgb) / 28%);
+	--ec-sbThumbHoverCol: rgb(var(--primary-rgb) / 55%);
+	--ec-frm-frameBoxShdCssVal: var(--shadow-soft);
+	--ec-frm-edBg: color-mix(in srgb, var(--card-bg) 94%, var(--primary));
+	--ec-frm-edTabBarBg: color-mix(
+		in srgb,
+		var(--surface-raised) 90%,
+		var(--primary)
+	);
+	--ec-frm-edTabBarBrdCol: color-mix(
+		in srgb,
+		var(--border) 70%,
+		var(--primary)
+	);
+	--ec-frm-edTabBarBrdBtmCol: color-mix(
+		in srgb,
+		var(--border) 70%,
+		var(--primary)
+	);
+	--ec-frm-edActTabBg: var(--surface-interactive);
+	--ec-frm-edActTabFg: var(--primary-lightest);
+	--ec-frm-edActTabBrdCol: color-mix(
+		in srgb,
+		var(--border) 60%,
+		var(--primary)
+	);
+	--ec-frm-edActTabIndTopCol: var(--primary);
+	--ec-frm-edActTabIndBtmCol: transparent;
+	--ec-frm-trmBg: color-mix(in srgb, var(--card-bg) 94%, var(--primary));
+	--ec-frm-trmTtbBg: color-mix(
+		in srgb,
+		var(--surface-raised) 90%,
+		var(--primary)
+	);
+	--ec-frm-trmTtbFg: var(--primary-lightest);
+	--ec-frm-trmTtbDotsFg: var(--primary);
+	--ec-frm-trmTtbBrdBtmCol: color-mix(
+		in srgb,
+		var(--border) 70%,
+		var(--primary)
+	);
+	--ec-frm-inlBtnFg: var(--primary-lightest);
+	--ec-frm-inlBtnBg: var(--primary);
+	--ec-frm-inlBtnBrd: var(--primary-light);
+	--ec-frm-tooltipSuccessBg: var(--surface-interactive);
+	--ec-frm-tooltipSuccessFg: var(--primary-lightest);
+}
+
+.expressive-code:has(.frame.has-title:not(.is-terminal)) {
+	padding: var(--space-2);
+	background: var(--ec-codeBg);
 }
 
 .expressive-code figure {
+	border-radius: var(--radius-md) !important;
 	box-shadow: none !important;
 }
 
-.expressive-code figure pre {
-	border-radius: 0 !important;
-}
-
-.expressive-code figcaption {
-	border: none !important;
-	border-radius: 0 !important;
-}
-
-.expressive-code figcaption::before {
-	border: none !important;
-}
-
-.expressive-code span.title:not(.is-terminal span.title) {
-	border-radius: 0 !important;
-}
-
-.expressive-code span.title::after {
-	border-top: 1px solid var(--primary) !important;
-	border-bottom: 0 !important;
-}
-
 .expressive-code .frame.has-title:not(.is-terminal) figcaption.header {
+	margin: 0 0 var(--space-2);
+	padding: 0 !important;
+	border: 0 !important;
 	border-radius: 0 !important;
+	background: transparent !important;
+}
+
+.expressive-code .frame.has-title:not(.is-terminal) figcaption.header::before {
+	display: none;
+}
+
+.expressive-code .frame.has-title:not(.is-terminal) span.title {
+	display: inline-flex;
+	align-items: center;
+	margin: 0;
+	padding: 0.45rem var(--space-2);
+	border: 1px solid color-mix(in srgb, var(--border) 60%, var(--primary)) !important;
+	border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, var(--primary)) !important;
+	border-radius: var(--radius-md) !important;
+	--tab-border-radius: var(--radius-md);
+	background: var(--surface-interactive);
+	box-shadow: 0 0.35rem 0.9rem rgb(var(--primary-rgb) / 10%);
+	color: var(--primary-lightest);
+}
+
+.expressive-code .frame.has-title:not(.is-terminal) span.title::after {
+	display: none;
 }
 
 .post-container {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
-	padding: 1rem;
-	border: 1px solid var(--border, #353535);
-	color: var(--fg, #ffffff);
+	gap: var(--space-2);
+	padding: var(--space-3);
+	border: 1px solid var(--border);
+	background: var(--card-bg);
+	border-radius: var(--radius-md);
+	box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 8%);
+	color: var(--fg);
 	text-decoration: none;
 	transition:
-		background-color 0.15s ease,
-		border 0.15s ease;
+		background-color 0.2s ease,
+		border-color 0.2s ease,
+		transform 0.2s ease;
 }
 
 .post-container:hover,
 .post-container:focus-visible {
-	background-color: rgba(var(--primary-rgb), 0.125);
-	border: 1px solid var(--primary);
-	color: var(--fg, #ffffff);
+	border-color: color-mix(in srgb, var(--border) 45%, var(--primary));
+	color: var(--fg);
 	text-decoration: none;
+	box-shadow: var(--shadow-hover), var(--interaction-glow);
 }
 
 .post-container:focus-visible {
@@ -135,44 +239,46 @@ main {
 }
 
 .post-date {
-	color: var(--fg-muted, #c7c7c7);
+	color: var(--fg-muted);
+	font-size: 0.875rem;
 }
 
 .text-glow {
 	color: var(--primary);
-	filter: drop-shadow(0 0 12px var(--primary));
+	filter: drop-shadow(
+		0 0 0.35rem color-mix(in srgb, var(--primary) 60%, transparent)
+	);
 	transition:
 		color 0.6s ease,
 		filter 0.6s ease;
 }
 
 .block-link {
-	color: var(--fg, #ffffff);
-	padding: 0.25rem 0.5rem;
+	display: inline-flex;
+	width: fit-content;
+	color: var(--fg);
+	padding: var(--space-1) var(--space-2);
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease,
+		transform 0.2s ease;
 }
 
 .block-link:hover,
 .block-link:focus-visible {
-	color: white;
-	background-color: var(--primary);
+	color: var(--fg);
+	border-color: color-mix(in srgb, var(--border) 45%, var(--primary));
 	text-decoration: none;
 	outline: none;
+	box-shadow: var(--interaction-glow);
 }
 
-@media screen and (max-width: 1380px) {
-	body {
-		padding: 0 2rem;
-	}
-}
-
-@media screen and (max-width: 640px) {
-	body {
-		padding: 0;
-	}
-
+@media screen and (max-width: 720px) {
 	main {
-		padding-top: 0;
-		gap: 1rem;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-3) var(--space-4);
 	}
 
 	.post-header {
@@ -184,5 +290,5 @@ main {
 .content-container {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--space-3);
 }

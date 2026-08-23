@@ -36,12 +36,20 @@ First, a small introduction to the project structure:
 │       ├── posts/
 │       ├── projects/
 │       ├── info.json
-│       ├── socials.json
+│       ├── config/
+│       │   └── site.yaml
 │       ├── tags.json
 │       └── work.json
 ├── .env
 └── astro.config.mjs
 ```
+
+> [!warning] This is a warning!
+
+> [!note] This is a callout.
+> This is regular text. Whatever you put here will be rendered normally.
+> You can also add **bold**, *italic*, and other text modifications. [Links too!](https://example.com).
+> `You can even put single code lines, like on GitHub!`
 
 There are other files and directories in the repository as well, but we're going to ignore them in this guide since they're not relevant.
 
@@ -98,6 +106,8 @@ export default defineConfig({
 
 Optionally, you can also add the `themeColor` and `twitterHandle` parameters next to the `name` parameter in the integration options.
 The theme color defaults to `#8c5cf5`. The Twitter handle doesn't have a default value, and the relevant meta tags will be omitted if it's not provided.
+
+> [!note] Keep site-specific profile settings, such as your social links and GitHub username, in `src/config/site.yaml`.
 
 ### Comments
 
@@ -158,18 +168,17 @@ Spectre supports both [Lucide](https://lucide.dev) and [Simple Icons](https://si
 
 ### Socials
 
-The `socials.json` file is similar to the `info.json` file in terms of structure and is used for the social links in the second card on the home page.
+The `config/site.yaml` file holds profile settings, including the social links in the second card on the home page.
 
-```jsonc title="socials.json"
-{
-  "id": 1, // The ID, has to be unique.
-  "icon": {
-    "type": "lucide", // The icon lib, either "lucide" or "simple-icons".
-    "name": "github" // The name of the icon.
-  },
-  "text": "GitHub", // The text in the link
-  "link": "https://github.com/louisescher/spectre" // The actual destination of the link
-}
+```yaml title="src/config/site.yaml"
+profile:
+  socials:
+    - id: 1
+      icon:
+        type: lucide # lucide or simple-icons
+        name: github
+      text: GitHub
+      link: https://github.com/louisescher/spectre
 ```
 
 ### Tags

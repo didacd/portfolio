@@ -93,15 +93,9 @@ class PageBackground {
 		const letters = Math.ceil(this.width / 17);
 		const lines = Math.ceil(this.height / 35);
 
-		// Loop through the canvas and draw the text
-		this.baseCtx.font = "28px Cascadia Code";
-		this.baseCtx.textAlign = "start";
-		this.baseCtx.textBaseline = "top";
-		this.baseCtx.fillStyle = "rgba(255, 255, 255, 0.01)";
-
+		// Record every character position; only the overlay canvas renders letters.
 		for (let i = 0; i < lines; i++) {
 			for (let j = 0; j < letters; j++) {
-				this.baseCtx.fillText(text[j % text.length], j * 17, i * 35);
 				this.letterPositions.push({
 					x: j * 17,
 					y: i * 35,
@@ -141,9 +135,6 @@ class PageBackground {
 				fadeout: Date.now() + animLength * 1000,
 			});
 		}
-
-		// Make the base canvas visible
-		this.baseCanvas.style.opacity = "1";
 	};
 
 	/**

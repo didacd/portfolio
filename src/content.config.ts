@@ -26,13 +26,26 @@ const quickInfo = defineCollection({
 	}),
 });
 
-const socials = defineCollection({
-	loader: file("src/content/socials.json"),
+const site = defineCollection({
+	loader: file("src/config/site.yaml"),
 	schema: z.object({
-		id: z.number(),
-		icon: z.union([lucideIconSchema, simpleIconSchema]),
-		text: z.string(),
-		link: z.string().url(),
+		github: z.object({ username: z.string().min(1) }),
+		socials: z.array(
+			z.object({
+				id: z.number(),
+				icon: z.union([lucideIconSchema, simpleIconSchema]),
+				text: z.string(),
+				link: z.string().url(),
+			}),
+		),
+		callouts: z.record(
+			z.string(),
+			z.object({
+				icon: z.custom<keyof typeof lucideIcons>(),
+				title: z.string(),
+				color: z.string(),
+			}),
+		),
 	}),
 });
 
@@ -93,6 +106,6 @@ export const collections = {
 	projects,
 	other,
 	quickInfo,
-	socials,
+	site,
 	workExperience,
 };

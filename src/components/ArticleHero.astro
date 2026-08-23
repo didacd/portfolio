@@ -1,0 +1,92 @@
+---
+import ImageGlow from "./ImageGlow.astro";
+
+interface Props {
+	title: string;
+	meta: string[];
+	image?: ImageMetadata;
+}
+
+const { title, meta, image } = Astro.props;
+---
+
+<header class:list={["article-hero", { "without-image": !image }]} id="_top">
+	{image && <ImageGlow quality={100} class="article-image" src={image} alt={title} />}
+	<div class="article-hero-content">
+		<h1>{title}</h1>
+		<div class="article-info">{meta.map((item) => <span>{item}</span>)}</div>
+	</div>
+</header>
+
+<style>
+	.article-hero {
+		position: relative;
+		display: grid;
+		min-height: 16rem;
+		isolation: isolate;
+		border-radius: var(--radius-md);
+		overflow: hidden;
+	}
+
+	.article-hero :global(.glow-image),
+	.article-hero :global(.article-image) {
+		grid-area: 1 / 1;
+		width: 100%;
+		height: 100%;
+	}
+
+	.article-hero :global(.article-image) {
+		object-fit: cover;
+	}
+
+	.article-hero::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		background: linear-gradient(0deg, color-mix(in srgb, var(--bg) 92%, transparent), transparent 68%);
+		pointer-events: none;
+	}
+
+	.article-hero-content {
+		grid-area: 1 / 1;
+		align-self: end;
+		position: relative;
+		z-index: 2;
+		padding: var(--space-4);
+	}
+
+	.article-hero h1 {
+		max-width: 24ch;
+		margin: 0;
+		font-size: clamp(1.8rem, 4vw, 2.75rem);
+		line-height: 1.1;
+		color: var(--heading);
+		text-shadow: 0 0.25rem 1.5rem color-mix(in srgb, var(--bg) 80%, transparent);
+	}
+
+	.article-info {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-2);
+		margin-top: var(--space-2);
+		color: var(--fg-muted);
+		font-size: 0.875rem;
+	}
+
+	.article-info span:not(:last-child)::after { content: "·"; margin-left: var(--space-2); }
+
+	.without-image {
+		min-height: 0;
+		background: var(--surface-raised);
+		border: 1px solid var(--border);
+		box-shadow: var(--shadow-soft);
+	}
+
+	.without-image::after { display: none; }
+
+	@media screen and (max-width: 720px) {
+		.article-hero { min-height: 12rem; }
+		.article-hero-content { padding: var(--space-3); }
+	}
+</style>

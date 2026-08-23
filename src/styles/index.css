@@ -3,13 +3,13 @@
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	gap: 2rem;
+	gap: var(--space-5);
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 720px) {
 	.layout-grid-left,
 	.layout-grid-right {
-		gap: 1rem;
+		gap: var(--space-3);
 	}
 }
 
@@ -18,59 +18,24 @@
 	flex-direction: column;
 }
 
-.header-container {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 1rem;
-	margin-bottom: 1rem;
-}
-
-.header-container * {
-	margin: 0;
-}
-
 .prose {
 	line-height: 1.6;
 }
 
-.post-container {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	padding: 1rem;
-	border: 1px solid var(--border, #353535);
-	color: var(--fg, #ffffff);
-	text-decoration: none;
-	transition:
-		background-color 0.15s ease,
-		border 0.15s ease;
-}
-
-.post-container:hover,
-.post-container:focus-visible {
-	background-color: rgba(var(--primary-rgb), 0.125);
-	border: 1px solid var(--primary);
-}
-
-.post-container:focus-visible {
-	outline: none;
-}
-
 .post-date,
 .work-experience-duration {
-	color: var(--fg-muted, #c7c7c7);
+	color: var(--fg-muted);
 }
 
 .work-experience-container {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--space-3);
 }
 
 .work-experience-entry:not(:last-of-type) {
-	border-bottom: 1px solid var(--border, #353535);
-	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--border);
+	padding-bottom: var(--space-3);
 }
 
 .work-experience-duration {
@@ -80,24 +45,26 @@
 .work-experience-company {
 	margin-top: 0.25rem;
 	margin-bottom: 0.5rem;
+	color: color-mix(in srgb, var(--fg) 82%, var(--primary));
 }
 
 .work-experience-role {
 	margin-bottom: 0.75rem;
+	color: color-mix(in srgb, var(--fg-muted) 82%, var(--primary));
 }
 
 .socials-link {
-	color: var(--fg, #ffffff);
+	color: var(--fg);
 	display: flex;
 	flex-direction: row;
-	gap: 0.75rem;
+	gap: var(--space-2);
 	align-items: center;
 }
 
 .stats-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 1rem;
+	gap: var(--space-3);
 	margin: 1.25rem 0;
 }
 
@@ -113,7 +80,7 @@
 }
 
 .stat span {
-	color: var(--fg-muted, #c7c7c7);
+	color: var(--fg-muted);
 }
 
 .github-languages {
