@@ -1,0 +1,77 @@
+---
+title: "Skills Give Agents Leverage. Guardrails Give Us Control."
+description: "skills.sh points toward a more capable era for AI agents—but greater capability demands sharper boundaries."
+image: "../../assets/pfp.png"
+createdAt: 08-28-2026
+draft: false
+tags:
+  - agents
+---
+
+The next step for AI agents is not simply a larger context window or a more persuasive prompt. It is giving an agent reusable ways of working: repeatable procedures, domain knowledge, and tools it can reach for when a task demands them.
+
+That is the idea behind [skills.sh](https://skills.sh/). It is an open directory of **skills**: small, reusable capability packages that teach an agent how to approach a job. A skill might provide a testing workflow, browser automation, design guidance, cloud expertise, or a process for writing and reviewing a pull request. Instead of rediscovering the same instructions in every conversation, the agent can load the relevant playbook when it is needed.
+
+It is an exciting direction. It is also exactly where we need to be disciplined.
+
+## From clever prompts to dependable procedures
+
+We have spent a lot of time asking models to do things with ever-more-elaborate prompts. That can work, but it is fragile. A prompt is often a one-off negotiation with a probabilistic system; a skill is an attempt to turn a good process into an asset that can be inspected, reused, improved, and shared.
+
+At their best, skills give an agent three things:
+
+- **Context at the right moment.** A database skill can explain the team's migration conventions without filling every conversation with database details.
+- **A repeatable workflow.** A testing skill can encourage the same loop every time: understand the change, make the smallest safe edit, run the relevant checks, and report the result.
+- **Specialisation without starting over.** One agent can move between infrastructure, documentation, and code review with clear, task-specific guidance instead of a vague instruction to "be good at everything."
+
+That matters because useful agents will increasingly be asked to work across real systems. The value is not just speed. It is reducing variance: making a sound path easier to follow than an improvisation.
+
+## Getting started with skills.sh
+
+The directory is a practical place to discover skills by topic, popularity, or the agent you use. The [skills.sh documentation](https://www.skills.sh/docs) describes skills as reusable procedural knowledge for agents and provides a CLI to install them.
+
+The basic command is straightforward:
+
+```bash
+npx skills add <owner>/<repository>
+```
+
+For example, the documentation uses `npx skills add vercel-labs/agent-skills`. The CLI can also install a shareable **pack**—a collection of public or private skills—with a pack URL. See the [CLI reference](https://www.skills.sh/docs/cli) for the current syntax and update commands.
+
+But the command is the least interesting part. Before adding a skill, I would treat it like any other dependency that can influence production work:
+
+1. Read the skill's description and its source repository.
+2. Inspect the instructions, scripts, and any tools it expects to use.
+3. Start in a disposable project or a read-only environment.
+4. Grant only the permissions the task actually needs.
+5. Review the output before allowing changes to code, infrastructure, or data.
+
+This takes a little longer than blindly installing the most popular result. It takes far less time than explaining an unexpected production change.
+
+## Skills do not remove responsibility
+
+There is an important distinction here: a skill can guide an agent, but guardrails decide what the agent is allowed to affect.
+
+An instruction that says "deploy the service" is not a safety model. If the goal is ambiguous, if the target environment is unclear, or if the agent hallucinates a command, an eager agent with broad credentials can turn one bad assumption into an incident very quickly.
+
+That is why my default posture is cautious. Agent capability should grow behind boundaries, not ahead of them. In practice, that means:
+
+- Read-only access by default, with explicit escalation for writes and destructive operations.
+- Short-lived, scoped credentials instead of shared administrator keys.
+- Clear separation between development, staging, and production.
+- Human approval for consequential actions such as deploying, changing permissions, spending money, or deleting data.
+- Logs, diffs, and test results that make an agent's work reviewable rather than magical.
+
+These are not brakes on progress. They are what make progress safe enough to trust. A well-designed agent environment should make the safe action easy, the dangerous action visible, and the irreversible action deliberately difficult.
+
+## The new era is about system design
+
+Skills hint at a more mature model of AI work. We are moving from asking a chatbot for an answer to composing systems that can investigate, plan, use tools, and carry a task across several steps. That can make people and teams dramatically more effective—especially when the system remembers the right procedure and has the right capabilities available.
+
+Yet we should resist the temptation to confuse autonomy with reliability. A more capable agent is not automatically a more trustworthy one. It can be wrong faster, apply the wrong instruction more consistently, or follow an unclarified request with impressive confidence.
+
+The real opportunity is not to hand an AI the keys and hope for the best. It is to build agents that operate inside thoughtful constraints: skills that encode good practice, permissions that match the task, and checkpoints where human judgment still matters.
+
+That is the future I want to help build—agents with real leverage, and humans who remain firmly in control of where that leverage goes.
+
+> [!note] A useful rule of thumb: if you would not let a new teammate perform an action without context, access review, and a rollback plan, an AI agent should not receive a more permissive path.
