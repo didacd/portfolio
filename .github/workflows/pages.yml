@@ -28,9 +28,10 @@ jobs:
       - name: Verify static release contents
         run: |
           test -f dist/index.html
-          test -f dist/blog/getting-started/index.html
-          test -f dist/projects/spectre/index.html
+          test -f dist/blog/index.html
+          test -f dist/projects/index.html
           test -f dist/pagefind/pagefind.js
+          find dist/blog -mindepth 2 -maxdepth 2 -name index.html -print -quit | grep -q .
       - name: Upload GitHub Pages artifact
         if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v4
