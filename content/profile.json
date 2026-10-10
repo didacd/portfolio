@@ -1,0 +1,32 @@
+{
+  "name": "Didac",
+  "role": "Cloud Security Engineer",
+  "location": "Barcelona - Spain",
+  "avatar": "/assets/images/pfp.png",
+  "github_username": "didacd",
+  "socials": [
+    { "text": "GitHub", "link": "https://github.com/didacd" },
+    { "text": "Mastodon", "link": "https://mastodon.social/@didacdomenech" },
+    { "text": "Mailbox", "link": "mailto:business@didacdomenech.com" }
+  ],
+  "work": [
+    {
+      "duration": "Q4 2021 - Q2 2022",
+      "company": "AVer Europa ES",
+      "title": "Sysadmin",
+      "description": "System administrator."
+    },
+    {
+      "duration": "Q2 2022 - Q3 2024",
+      "company": "Google",
+      "title": "Google Cloud Security Engineer",
+      "description": "Worked as an SME for L3 support in Google's own public cloud."
+    },
+    {
+      "duration": "Q4 2024 - present",
+      "company": "Telefonica UK",
+      "title": "Subject Matter Expert - Kubernetes",
+      "description": "Working as an Infrastructure SME for Openshift & building the future of Telefonica's Telco Cloud Infrastructure."
+    }
+  ]
+}
